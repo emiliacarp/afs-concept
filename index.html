@@ -34,10 +34,19 @@ a{text-decoration:none;color:inherit}
 .intro-tag{position:absolute;left:50%;transform:translateX(-50%);bottom:-64px;white-space:nowrap;font-size:13px;font-weight:700;letter-spacing:.42em;text-transform:uppercase;color:var(--navy);opacity:0;animation:tagIn .8s ease 1s forwards}
 @keyframes tagIn{to{opacity:.75}}
 .intro-tag em{color:var(--red);font-style:normal}
-/* the eagle that flies away — real footage takes over the sky */
-#intro-fly{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .55s ease;pointer-events:none}
-#intro.flying #intro-fly{opacity:1}
-#intro.flying .intro-stage{opacity:0;transform:scale(.955);transition:opacity .5s ease .12s,transform .6s ease .12s}
+/* the eagle that flies away — the sky pours out of the logo (feathered radial reveal) */
+#intro-fly{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;pointer-events:none;
+  -webkit-mask-image:radial-gradient(circle,#000 52%,transparent 78%);mask-image:radial-gradient(circle,#000 52%,transparent 78%);
+  -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+  -webkit-mask-position:center 45%;mask-position:center 45%;
+  -webkit-mask-size:30% 30%;mask-size:30% 30%;
+  transform:scale(1.06);
+  transition:opacity .5s ease,transform 1.35s ease,
+    -webkit-mask-size 1.3s cubic-bezier(.3,.55,.25,1),mask-size 1.3s cubic-bezier(.3,.55,.25,1)}
+#intro.flying #intro-fly{opacity:1;transform:scale(1);
+  -webkit-mask-size:430% 430%;mask-size:430% 430%}
+#intro.flying .intro-stage{opacity:0;transform:scale(1.1);filter:blur(5px);
+  transition:opacity .6s ease .12s,transform .85s ease,filter .7s ease .08s}
 #skip{position:fixed;bottom:26px;right:28px;z-index:103;background:none;border:1px solid var(--line);color:var(--muted);font:600 12px 'Inter';letter-spacing:.14em;text-transform:uppercase;padding:9px 16px;border-radius:99px;cursor:pointer;opacity:.7}
 #skip:hover{opacity:1}
 #intro.done #skip{display:none}
