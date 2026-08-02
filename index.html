@@ -163,6 +163,10 @@ input.f-err{border-color:var(--red) !important;box-shadow:0 0 0 4px rgba(166,32,
 .player:hover .play-btn{transform:scale(1.08);background:var(--red-2)}
 .player.playing .play-btn{opacity:0;pointer-events:none;transition:opacity .25s}
 .film-note{text-align:center;margin-top:18px;font-size:12.5px;letter-spacing:.08em;color:rgba(255,255,255,.45);text-transform:uppercase;font-weight:600}
+.sound-chip{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);display:none;align-items:center;gap:8px;padding:12px 22px;border-radius:999px;border:none;cursor:pointer;background:rgba(1,26,51,.82);color:#fff;font:700 14px 'Inter';backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 12px 30px -8px rgba(0,0,0,.5);transition:background .25s,transform .25s}
+.sound-chip:hover{background:var(--red);transform:translateX(-50%) scale(1.05)}
+.player.ambient .sound-chip{display:flex}
+.player.ambient .play-btn{opacity:0;pointer-events:none}
 
 /* ---------- sections ---------- */
 section{padding:clamp(80px,9vw,140px) clamp(20px,5vw,64px)}
@@ -382,8 +386,9 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.75);padding:70px clam
       <p>Pressure becomes a plan — and the eagle takes flight.</p>
     </div>
     <div class="player reveal" id="player">
-      <video id="film-v" src="media/afs-spot.mp4" poster="media/afs-spot-poster.jpg" preload="metadata" playsinline></video>
+      <video id="film-v" src="media/afs-spot.mp4" poster="media/afs-spot-poster.jpg" preload="metadata" playsinline muted loop></video>
       <button class="play-btn" aria-label="Play the film"><svg viewBox="0 0 24 24"><path d="M6 3.5v17l14-8.5z"/></svg></button>
+      <button class="sound-chip" id="sound-chip" aria-label="Watch with sound"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1c2.9.9 5 3.5 5 6.7s-2.1 5.8-5 6.7v2.1c4-.9 7-4.5 7-8.8s-3-7.9-7-8.8z"/></svg> Watch with sound</button>
     </div>
     <p class="film-note">AFS "Backbone" — concept spot by VisionPod Studio</p>
   </div>
@@ -595,13 +600,37 @@ new IntersectionObserver(es=>{
   callbar.classList.toggle('show', !es[0].isIntersecting);
 },{threshold:.15}).observe(heroEl);
 
-// ---------- film player ----------
+// ---------- film player: ambient autoplay (muted) -> click for sound ----------
 const player = document.getElementById('player');
 const filmV = document.getElementById('film-v');
-player.addEventListener('click', ()=>{ filmV.paused ? filmV.play() : filmV.pause(); });
+const soundChip = document.getElementById('sound-chip');
+let soundMode = false;
+function ambient(on){
+  if(on){ soundMode=false; filmV.muted=true; filmV.loop=true; player.classList.add('ambient'); }
+  else { player.classList.remove('ambient'); }
+}
+new IntersectionObserver(es=>{
+  if(soundMode) return;
+  const e = es[es.length-1];
+  if(e.intersectionRatio >= 0.35){ ambient(true); filmV.play().catch(()=>{}); }
+  else { filmV.pause(); }
+},{threshold:[0,.35]}).observe(player);
+player.addEventListener('click', ()=>{
+  if(!soundMode){
+    soundMode=true; ambient(false);
+    filmV.currentTime=0; filmV.muted=false; filmV.loop=false;
+    filmV.play().catch(()=>{});
+  } else {
+    filmV.paused ? filmV.play() : filmV.pause();
+  }
+});
 filmV.addEventListener('play', ()=>player.classList.add('playing'));
-filmV.addEventListener('pause', ()=>player.classList.remove('playing'));
-filmV.addEventListener('ended', ()=>{ player.classList.remove('playing'); filmV.currentTime=0; });
+filmV.addEventListener('pause', ()=>{ if(soundMode) player.classList.remove('playing'); });
+filmV.addEventListener('ended', ()=>{
+  player.classList.remove('playing');
+  soundMode=false; filmV.currentTime=0;
+  ambient(true); filmV.play().catch(()=>{});
+});
 
 // ---------- FAQ: close others ----------
 document.querySelectorAll('.faq').forEach(d=>d.addEventListener('toggle',()=>{
