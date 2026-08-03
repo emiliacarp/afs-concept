@@ -47,6 +47,15 @@ a{text-decoration:none;color:inherit}
   -webkit-mask-size:430% 430%;mask-size:430% 430%}
 #intro.flying .intro-stage{opacity:0;transform:scale(1.1);filter:blur(5px);
   transition:opacity .6s ease .12s,transform .85s ease,filter .7s ease .08s}
+/* portrait phones: crop the sky to where the eagle flies, and let the ghosted
+   logo ride along most of the flight so the contrail is never alone in frame */
+@media (max-aspect-ratio: 4/5){
+  #intro-fly{object-position:64% 40%}
+  #intro.flying .intro-stage{opacity:.32;transform:scale(1.05);filter:blur(1.5px);
+    transition:opacity .8s ease .1s,transform .9s ease,filter .7s ease .08s;
+    animation:stageGhostOut .9s ease 2.7s forwards}
+}
+@keyframes stageGhostOut{to{opacity:0}}
 #skip{position:fixed;bottom:26px;right:28px;z-index:103;background:none;border:1px solid var(--line);color:var(--muted);font:600 12px 'Inter';letter-spacing:.14em;text-transform:uppercase;padding:9px 16px;border-radius:99px;cursor:pointer;opacity:.7}
 #skip:hover{opacity:1}
 #intro.done #skip{display:none}
@@ -512,7 +521,8 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.75);padding:70px clam
 const intro = document.getElementById('intro');
 const flyVid = document.getElementById('intro-fly');
 const FLY_AT = 1600;   // logo has resolved; footage takes the sky
-const INTRO_MS = 5300; // fade to site while the eagle is still climbing
+// portrait phones end sooner: the cropped sky empties out once the eagle exits
+const INTRO_MS = matchMedia('(max-aspect-ratio: 4/5)').matches ? 4600 : 5300;
 let flyTimer = setTimeout(startFlight, FLY_AT);
 let introTimer = setTimeout(endIntro, INTRO_MS);
 function startFlight(){
